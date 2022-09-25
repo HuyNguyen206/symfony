@@ -16,7 +16,10 @@
         <i style="color: #444; font-size: 2rem;" class="pb-1 fad fa-cauldron"></i>
         <p class="pl-2 d-inline font-weight-bold" style="color: #444;">Cauldron Overflow</p>
     </a>
-    <button class="btn btn-dark">Sign up</button>
+    <div>
+        <a class="btn btn-secondary" style="color: white">Sign up</a>
+        <a href="{{ path('questions.create') }}" class="btn btn-info">New question</a>
+    </div>
 </nav>
 
 {% block body %}{% endblock %}

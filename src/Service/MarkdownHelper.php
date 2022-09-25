@@ -3,11 +3,12 @@
 namespace App\Service;
 
 use Knp\Bundle\MarkdownBundle\MarkdownParserInterface;
+use Psr\Log\LoggerInterface;
 
 class MarkdownHelper {
 
 
-    public function __construct(private MarkdownParserInterface $markdownParser, private bool $isDebug)
+    public function __construct(private MarkdownParserInterface $markdownParser, private bool $isDebug, private LoggerInterface $logger)
     {}
 
     public function parse(string $source): string
