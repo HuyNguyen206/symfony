@@ -16,10 +16,17 @@
         <i style="color: #444; font-size: 2rem;" class="pb-1 fad fa-cauldron"></i>
         <p class="pl-2 d-inline font-weight-bold" style="color: #444;">Cauldron Overflow</p>
     </a>
-    <div>
-        <a class="btn btn-secondary" style="color: white">Sign up</a>
-        <a href="{{ path('questions.create') }}" class="btn btn-info">New question</a>
-    </div>
+    <ul style="display: flex; list-style: none">
+        <li class="nav-item ml-2">
+            <a href="{{ path('questions.create') }}" class="btn btn-info">New question</a>
+        </li>
+        <li class="nav-item ml-2">
+            <a href="{{ path('answers.popular') }}" class="btn btn-info">Popular answer</a>
+        </li>
+        <li class="nav-item ml-2">
+            <a href="{{ path('questions.create') }}" class="btn btn-info">Sign up</a>
+        </li>
+    </ul>
 </nav>
 
 {% block body %}{% endblock %}

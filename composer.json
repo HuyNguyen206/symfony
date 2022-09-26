@@ -21,7 +21,10 @@
         "symfony/framework-bundle": "6.1.*",
         "symfony/proxy-manager-bridge": "6.1.*",
         "symfony/runtime": "6.1.*",
-        "symfony/yaml": "6.1.*"
+        "symfony/string": "6.1.*",
+        "symfony/yaml": "6.1.*",
+        "twig/string-extra": "^3.4",
+        "twig/twig": "^3.0"
     },
     "config": {
         "allow-plugins": {

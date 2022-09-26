@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Answer;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -37,6 +38,39 @@ class AnswerRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public static function createApprovedCriteria(): Criteria
+    {
+        return Criteria::create()->andWhere(Criteria::expr()->eq('status', Answer::STATUS_APPROVED));
+    }
+
+    /**
+     * @return Answer[]
+     */
+    public function findAllApproved(int $max = 10): array
+    {
+        return $this->createQueryBuilder('answer')->addCriteria(self::createApprovedCriteria())
+            ->setMaxResults($max)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findMostPoplular($query = null)
+    {
+        $queryBuilder = $this->createQueryBuilder('answer')
+            ->addCriteria(self::createApprovedCriteria())
+            ->orderBy('answer.votes', 'desc')
+            ->innerJoin('answer.question', 'question')
+            ->addSelect('question');
+        if ($query) {
+            $queryBuilder->andWhere("answer.content like :searchTerm or question.question like :searchTerm")
+                ->setParameter('searchTerm', "%$query%");
+        }
+
+        return $queryBuilder->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

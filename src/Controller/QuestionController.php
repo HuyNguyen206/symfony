@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Answer;
 use App\Entity\Question;
+use App\Repository\AnswerRepository;
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -46,14 +48,9 @@ class QuestionController extends AbstractController {
 //        if ($question === null) {
 //            throw $this->createNotFoundException(sprintf('No question found for slug %s', $slug));
 //        }
+//        $answers = $answerRepository->findBy(['question' => $question]);
 
-        $answers = [
-            'Make sure your cat is sitting `purrrfectly` still ?',
-            'Honestly, I like furry shoes better than MY cat',
-            'Maybe... try saying the spell backwards?',
-        ];
-
-        return $this->render('question/show.html.twig', compact('question', 'answers'));
+        return $this->render('question/show.html.twig', compact('question'));
     }
     #[Route('questions/{slug}/vote', name: 'questions.vote', methods: 'POST')]
     public function updateVote(Question $question, EntityManagerInterface $entityManager, Request $request)
@@ -69,5 +66,21 @@ class QuestionController extends AbstractController {
 
         return $this->redirectToRoute('questions.show', ['slug' => $question->getSlug()]);
     }
+
+    #[Route('answers/{answer}/vote', name: 'answers.vote', methods: 'POST')]
+    public function updateAnswerVote(Answer $answer, EntityManagerInterface $entityManager, Request $request)
+    {
+        $isIncrease = $request->get('direction') === 'up';
+        if ($isIncrease) {
+            $answer->upVote();
+        } else {
+            $answer->downVote();
+        }
+
+        $entityManager->flush();
+
+        return $this->redirectToRoute('questions.show', ['slug' => $answer->getQuestion()->getSlug()]);
+    }
+
 
 }

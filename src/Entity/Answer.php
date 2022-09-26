@@ -6,11 +6,16 @@ use App\Repository\AnswerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use function Symfony\Component\String\u;
 
 #[ORM\Entity(repositoryClass: AnswerRepository::class)]
 class Answer
 {
     use TimestampableEntity;
+
+    public const STATUS_NEEDS_APPROVAL = 'needs_approval';
+    public const STATUS_SPAM = 'spam';
+    public const STATUS_APPROVED = 'approved';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -22,6 +27,16 @@ class Answer
 
     #[ORM\Column]
     private ?int $votes = 0;
+
+    #[ORM\Column(length: 255)]
+    private ?string $username = null;
+
+    #[ORM\ManyToOne(inversedBy: 'answers')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Question $question = null;
+
+    #[ORM\Column(length: 15)]
+    private ?string $status = self::STATUS_NEEDS_APPROVAL;
 
     public function getId(): ?int
     {
@@ -50,5 +65,80 @@ class Answer
         $this->votes = $votes;
 
         return $this;
+    }
+
+    public function upVote(): self
+    {
+        $this->votes++;
+
+        return $this;
+    }
+    public function downVote(): self
+    {
+        $this->votes--;
+
+        return $this;
+    }
+
+    public function getVotesString(): string
+    {
+        $sign = '';
+        if ($this->votes > 0) {
+            $sign = '+';
+        } elseif ($this->votes < 0) {
+            $sign = '-';
+        }
+        $votesValue = abs($this->votes);
+
+        return "$sign $votesValue";
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): self
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    public function getQuestion(): ?Question
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(?Question $question): self
+    {
+        $this->question = $question;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        if (!in_array($status, [self::STATUS_NEEDS_APPROVAL, self::STATUS_SPAM, self::STATUS_APPROVED])) {
+            throw new \InvalidArgumentException(sprintf('Invalid status "%s"', $status));
+        }
+
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getQuestionText(): string
+    {
+        if (!$this->getQuestion()) {
+            return '';
+        }
+
+        return u((string) $this->getQuestion()->getQuestion())->truncate(80, '...');
     }
 }
