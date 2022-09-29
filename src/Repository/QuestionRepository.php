@@ -6,6 +6,7 @@ use App\Entity\Question;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 
 /**
  * @extends ServiceEntityRepository<Question>
@@ -40,12 +41,14 @@ class QuestionRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllAskedOrderedByNewest()
+    public function createAskedOrderedByNewestQueryBuilder(): QueryBuilder
     {
        return $this->addIsAskedQueryBuilder()
             ->orderBy('q.askedAt', 'desc')
-            ->getQuery()
-            ->getResult();
+            ->leftJoin('q.tags', 'tag')
+           ->addSelect('tag');
+//            ->getQuery()
+//            ->getResult();
     }
 
     private function addIsAskedQueryBuilder(QueryBuilder $builder = null): QueryBuilder

@@ -7,6 +7,8 @@ use App\Entity\Question;
 use App\Repository\AnswerRepository;
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,13 +24,18 @@ class QuestionController extends AbstractController {
         ]);
     }
 
-    #[Route('/', name: 'homepage')]
-    public function homepage(QuestionRepository $questionRepository)
+    #[Route('/{page<\d+>}', name: 'homepage')]
+    public function homepage(QuestionRepository $questionRepository, Request $request, int $page = 1)
     {
 //        $questionRepo = $entityManager->getRepository(Question::class);
 //        $questions = $questionRepo->findBy([], ['askedAt' => 'desc']);
-        $questions = $questionRepository->findAllAskedOrderedByNewest();
-        return $this->render('homepage.html.twig', compact('questions'));
+        $queryBuilder = $questionRepository->createAskedOrderedByNewestQueryBuilder();
+        $pagerfanta = (new Pagerfanta(
+            new QueryAdapter($queryBuilder)
+        ))->setMaxPerPage(2)
+        ->setCurrentPage($page);
+
+        return $this->render('homepage.html.twig', compact('pagerfanta'));
     }
 
     #[Route('questions/new', name: 'questions.create')]

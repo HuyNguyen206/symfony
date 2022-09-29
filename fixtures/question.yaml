@@ -1,0 +1,8 @@
+App\Entity\Question:
+  question_{1..10}:
+    name: <realText(50)>
+    question: <paragraphs(5,true)>
+    votes: <randomNumber()>
+    slug: <slug()>
+    askedAt: <dateTimeBetween('-100 days', '-1 minutes')>
+

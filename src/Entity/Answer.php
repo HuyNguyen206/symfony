@@ -2,13 +2,49 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Common\Filter\SearchFilterInterface;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\AnswerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 use function Symfony\Component\String\u;
 
 #[ORM\Entity(repositoryClass: AnswerRepository::class)]
+#[Get]
+#[Put(security: "is_granted('ROLE_ADMIN') or object.getOwner() == user", securityMessage: 'You must be admin or owner of this answer')]
+#[GetCollection]
+#[Post(security: "is_granted('ROLE_ADMIN')")]
+
+#[ApiResource(
+    normalizationContext: ['groups' => 'answer:read'],
+    denormalizationContext: ['groups' => 'answer:write-field'],
+    paginationClientItemsPerPage: 2
+)]
+
+#[ApiFilter(
+    SearchFilter::class,
+    properties: [
+        'username' => SearchFilterInterface::STRATEGY_PARTIAL,
+        'question.name' => SearchFilterInterface::STRATEGY_PARTIAL,
+        'question.id' => SearchFilterInterface::STRATEGY_EXACT
+    ]
+)]
+#[ApiFilter(
+    OrderFilter::class,
+    properties: ['votes']
+)]
 class Answer
 {
     use TimestampableEntity;
@@ -20,23 +56,36 @@ class Answer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['answer:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['answer:read', 'answer:write-field'])]
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Groups(['answer:read', 'answer:write-field'])]
     private ?int $votes = 0;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['answer:read', 'answer:write-field'])]
+    #[NotNull]
+    #[NotBlank]
     private ?string $username = null;
 
     #[ORM\ManyToOne(inversedBy: 'answers')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['answer:read', 'answer:write-field'])]
+    #[NotNull]
+    #[NotBlank]
     private ?Question $question = null;
 
     #[ORM\Column(length: 15)]
+    #[Groups(['answer:read'])]
     private ?string $status = self::STATUS_NEEDS_APPROVAL;
+
+    #[ORM\ManyToOne(inversedBy: 'answers')]
+    private ?User $owner = null;
 
     public function getId(): ?int
     {
@@ -140,5 +189,17 @@ class Answer
         }
 
         return u((string) $this->getQuestion()->getQuestion())->truncate(80, '...');
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $user): self
+    {
+        $this->owner = $user;
+
+        return $this;
     }
 }

@@ -1,0 +1,8 @@
+App\Entity\Answer:
+  Answer{1..100}:
+    content: <text()>
+    username: <userName()>
+    votes: <randomNumber()>
+    createdAt: <dateTimeBetween('-1 year')>
+    question: '@question_*'
+

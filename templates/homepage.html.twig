@@ -14,7 +14,7 @@
         </div>
     </div>
     <div class="row">
-        {% for index,question in questions %}
+        {% for index,question in pagerfanta %}
         <div class="col-12">
             <div style="box-shadow: 2px 3px 9px 4px rgba(0,0,0,0.04);">
                 <div class="q-container p-4">
@@ -34,6 +34,9 @@
                                 <a class="vote-up" href="#"><i class="far fa-arrow-alt-circle-up"></i></a>
                                 <a class="vote-down" href="#"><i class="far fa-arrow-alt-circle-down"></i></a>
                             </div>
+                            {% for tag in question.tags %}
+                                <span class="badge rounded-pill bg-light text-dark">{{ tag.name }}</span>
+                            {% endfor %}
                         </div>
                         <div class="col">
                             <a class="q-title" href="{{ path('questions.show', {'slug' : question.slug}) }}"><h2>{{ question.name }}</h2></a>
@@ -53,6 +56,7 @@
             </div>
         </div>
         {% endfor %}
+        {{ pagerfanta(pagerfanta) }}
     </div>
 </div>
 {% endblock %}

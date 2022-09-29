@@ -1,0 +1,7 @@
+api_platform:
+    defaults:
+        items_per_page: 5 # Default value
+        pagination_client_items_per_page: true
+    collection:
+        pagination:
+            items_per_page_parameter_name: itemsPerPage # Default value
